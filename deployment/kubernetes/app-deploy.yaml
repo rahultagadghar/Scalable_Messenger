@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socket-io-scale
+spec:
+  selector:
+    matchLabels:
+      app: socket-io-scale
+  template:
+    metadata:
+      labels:
+        app: socket-io-scale
+    spec:
+      containers:
+      - name: socket-io-scale
+        image: socket-io-scale
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        env:
+        - name:  REDIS_DB
+          value:  redis-db-service       
+        ports:
+          - containerPort: 8080
+        imagePullPolicy: Never
