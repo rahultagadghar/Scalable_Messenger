@@ -1,5 +1,5 @@
 {
-  "name": "withadapter",
+  "name": "Scalable_SocketIo",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "start": "node out/server.js",
     "build": "tsc && cp src/index.html out/"
   },
-  "author": "",
+  "author": "Rahul Tagadghar",
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
