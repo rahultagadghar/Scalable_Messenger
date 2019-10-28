@@ -1,26 +1,33 @@
-apiVersion: apps/v1
+
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: socket-io-scale
+  name:  socket-io-scale
+  labels:
+    name:  socket-io-scale
 spec:
-  selector:
-    matchLabels:
-      app: socket-io-scale
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: socket-io-scale
+        name:  socket-io-scale
     spec:
       containers:
-      - name: socket-io-scale
-        image: socket-io-scale
+      - image:  socket-io-scale
+        name:  socket-io-scale
         resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
+          requests:
+            cpu: "20m"
+            memory: "55M"
         env:
         - name:  REDIS_DB
           value:  redis-db-service       
         ports:
-          - containerPort: 8080
+        - containerPort:  3000
+          name:  socket-io-scale
         imagePullPolicy: Never
+      restartPolicy: Always
