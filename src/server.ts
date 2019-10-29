@@ -4,7 +4,7 @@ import redisAdapter from "socket.io-redis";
 
 const port = process.env.PORT || 3000
 import express from 'express'
-import { SetUserName, DeleteUserName } from "./socket/identity";
+import { SetUserName, DeleteUserName, GetAndSendMessage } from "./socket/identity";
 const app = express();
 const server = require('http').Server(app);
 const io: any = require('socket.io')(server);
@@ -18,6 +18,9 @@ io.adapter(redisAdapter(redisConfiguration));
 
 io.use(SetUserName)
     .on('connection', (socket: Socket) => {
+
+        socket.on("One-One-From-Client", GetAndSendMessage.bind(io))
+
         io.emit('hello', "awesome")
         socket.on('disconnect', DeleteUserName.bind(socket))
     });
