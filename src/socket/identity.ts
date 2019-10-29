@@ -1,37 +1,46 @@
 import { Socket, Server } from "socket.io";
-import Redis from "ioredis"
-const redisConfiguration = { host: process.env.REDIS_DB || `localhost`, port: 6379 }
+import Redis from "ioredis";
+import { channel, msgPayload } from '../interface'
+import { messageModel } from "../model/messages";
+const redisConfiguration = {
+    host: process.env.REDIS_DB || `localhost`,
+    port: 6379
+};
 
 const redis = new Redis(redisConfiguration);
 
+export async function getMessages(socket: Socket, next: Function) {
+    const query = {
+        receiverUserName: socket.handshake.query.userName
+    }
+    const allUserMessages = await messageModel.find(query);
+    if (!allUserMessages) {
+        return next();
+    }
+    socket.emit(channel.ONE_TO_ONE_FROM_SERVER, allUserMessages)
+    await messageModel.remove(query)
+    next()
+}
 
 export function SetUserName(socket: Socket, next: Function) {
     redis.set(socket.handshake.query.userName, socket.id);
-    next()
+    next();
 }
 
 export function DeleteUserName(this: Socket) {
     redis.del(this.handshake.query.userName);
 }
 
-async function getSocketId(userName: any) {
-    const result: any = await redis.get(userName)
-    return result
+async function getSocketId(userName: string): Promise<any> {
+    return await redis.get(userName);
 }
 
-interface msgPayload {
-    userName: string | null,
-    toSocketId: string,
-    message: string
-}
-
-export async function GetAndSendMessage(this: Server, msg: any) {
-
-    console.log('got masg', msg)
-    
-    const id = await getSocketId(msg.userName)
-    console.log("id", id)
-    // this.to(msg.toSocketId).emit("One-One-From-Server", msg.message)
-    this.to(id).emit("One-One-From-Server", msg.message)
-
+export async function GetAndSendMessage(this: Server, msg: msgPayload) {
+    msg.time = Date.now();
+    const id = await getSocketId(msg.receiverUserName);
+    console.log('msg', msg)
+    if (!id) {
+        return await messageModel.insertMany([msg]);
+    }
+    this.to(id).emit(channel.ONE_TO_ONE_FROM_SERVER, msg);
 }

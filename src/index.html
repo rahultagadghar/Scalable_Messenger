@@ -13,26 +13,26 @@
   <!-- <script src="?userName=rahul/socket.io/socket.io.js"></script> -->
   <script>
     let socket = null;
+    let senderUserName = null;
+    function connect(userName) {
+      senderUserName = userName;
 
-    function connect(userName = "rahul") {
       socket = io.connect("http://localhost:3000", {
         query: `userName=${userName}`
       });
 
-      socket.on("hello", function(data) {
-        console.log("helllo", data);
-      });
+      socket.on("connect", () => console.log("connected"));
 
       socket.on("One-One-From-Server", function(data) {
         console.log("from server", data);
       });
     }
 
-    function send(toUserName = "", msg = "from client" ) {
+    function send(receiverUserName = "", message = "from client") {
       const payload = {
-        userName: toUserName,
-        toSocketId: "",
-        message: msg
+        receiverUserName,
+        senderUserName,
+        message
       };
 
       socket.emit("One-One-From-Client", payload);

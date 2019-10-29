@@ -1,7 +1,10 @@
-// export interface ErrorHandler extends Error {
-//     constructor(data: any){
-//     super(data)
-// }
+export enum channel {
+    ONE_TO_ONE_FROM_SERVER = "One-One-From-Server"
+}
 
-// httpStatusCode
-// } 
+export interface msgPayload {
+    senderUserName: string;
+    receiverUserName: string;
+    message: string;
+    time: number;
+}

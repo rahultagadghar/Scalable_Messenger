@@ -1,10 +1,16 @@
 import { Socket } from "socket.io";
 import { NextFunction, Response, Request } from "express";
 import redisAdapter from "socket.io-redis";
+import { connect } from 'mongoose'
+
+connect("mongodb://localhost/chat",
+    { useUnifiedTopology: true, useNewUrlParser: true })
+    .then(() => console.log("connected"))
+    .catch(console.log)
 
 const port = process.env.PORT || 3000
 import express from 'express'
-import { SetUserName, DeleteUserName, GetAndSendMessage } from "./socket/identity";
+import { SetUserName, DeleteUserName, GetAndSendMessage, getMessages } from "./socket/identity";
 const app = express();
 const server = require('http').Server(app);
 const io: any = require('socket.io')(server);
@@ -16,12 +22,13 @@ server.listen(port, () => console.log(`server started on port : ${port}`));
 
 io.adapter(redisAdapter(redisConfiguration));
 
-io.use(SetUserName)
+io
+    .use(SetUserName)
+    .use(getMessages)
     .on('connection', (socket: Socket) => {
 
         socket.on("One-One-From-Client", GetAndSendMessage.bind(io))
 
-        io.emit('hello', "awesome")
         socket.on('disconnect', DeleteUserName.bind(socket))
     });
 
