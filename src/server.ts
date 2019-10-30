@@ -1,5 +1,5 @@
 import { channel } from "./interface";
-import { Socket } from "socket.io";
+import { Socket, Server } from "socket.io";
 import { NextFunction, Response, Request } from "express";
 import redisAdapter from "socket.io-redis";
 import { connect } from "mongoose";
@@ -22,7 +22,7 @@ import {
 } from "./socket/identity";
 const app = express();
 const server = require("http").Server(app);
-const io: any = require("socket.io")(server);
+const io: Server = require("socket.io")(server);
 
 const redisConfiguration = {
     host: process.env.REDIS_DB || `localhost`,
@@ -37,16 +37,17 @@ io
     .use(setUserName)
     .use(getOldMessages)
     .use(setOnlineStatus.bind({ activeStatus: true }))
-    .on("connection", (socket: Socket) => {
+    .on(channel.CONNECTION, (socket: Socket) => {
         socket.on(channel.ONE_TO_ONE_FROM_CLIENT, getAndSendMessage.bind(io));
-        socket.on("disconnect", onDisconnect.bind(socket));
+        socket.on(channel.DISCONNECT, onDisconnect.bind(socket));
     });
 
 app.get("/", function (req: any, res: any) {
     res.sendFile(__dirname + "/index.html");
 });
 app.get("/clients", function (req: any, res: Response, next: NextFunction) {
-    io.of("/").adapter.clients((err: any, clients: any) => {
+    const { adapter }: any = io.of("/")
+    adapter.clients((err: any, clients: any) => {
         if (err) {
             return next({ httpStatusCode: 400, message: `Bad request` });
         }
