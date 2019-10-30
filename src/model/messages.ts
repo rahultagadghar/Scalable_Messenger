@@ -3,7 +3,7 @@ import { Schema, model } from 'mongoose'
 const messageSchema = new Schema({
     senderUserName: String,
     receiverUserName: String,
-    messages: Array,
+    message: String,
     time: { type: Date, default: Date.now }
 })
 

@@ -6,4 +6,4 @@ const onlineStatusSchema = new Schema({
     lastSeen: { type: Date, default: Date.now }
 })
 
-export const messageModel = model("lastSeen", onlineStatusSchema)
+export const onlineStatusModel = model("lastSeen", onlineStatusSchema)
