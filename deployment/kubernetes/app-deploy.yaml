@@ -26,6 +26,8 @@ spec:
         env:
         - name:  REDIS_DB
           value:  redis-db-service       
+        - name:  MONGO_DB
+          value:  mongo-db-service       
         ports:
         - containerPort:  3000
           name:  socket-io-scale

@@ -8,7 +8,7 @@
     "start": "node out/server.js",
     "build": "tsc && cp src/index.html out/"
   },
-  "author": "Rahul Tagadghar",
+  "author": "rahultagadghar@gmail.com",
   "license": "ISC",
   "dependencies": {
     "@types/ioredis": "^4.0.18",

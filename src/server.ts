@@ -3,15 +3,6 @@ import { Socket, Server } from "socket.io";
 import { NextFunction, Response, Request } from "express";
 import redisAdapter from "socket.io-redis";
 import { connect } from "mongoose";
-
-connect(
-    "mongodb://localhost/chat",
-    { useUnifiedTopology: true, useNewUrlParser: true }
-)
-    .then(() => console.log("connected"))
-    .catch(console.log);
-
-const port = process.env.PORT || 3000;
 import express from "express";
 import {
     setUserName,
@@ -20,21 +11,29 @@ import {
     setOnlineStatus,
     onDisconnect
 } from "./socket/identity";
+
+const {
+    MONGO_DB = `mongodb://localhost/chat`,
+    PORT = 3000,
+    REDIS_DB = `localhost`
+} = process.env;
+
+const mongoDbConfig = { useUnifiedTopology: true, useNewUrlParser: true }
+const redisConfiguration = { host: REDIS_DB, port: 6379 };
+
 const app = express();
 const server = require("http").Server(app);
 const io: Server = require("socket.io")(server);
 
-const redisConfiguration = {
-    host: process.env.REDIS_DB || `localhost`,
-    port: 6379
-};
+connect(MONGO_DB, mongoDbConfig)
+    .then(() => console.log("connected"))
+    .catch(console.log);
 
-server.listen(port, () => console.log(`server started on port : ${port}`));
+server.listen(PORT, () => console.log(`server started on port : ${PORT}`));
 
 io.adapter(redisAdapter(redisConfiguration));
 
-io
-    .use(setUserName)
+io.use(setUserName)
     .use(getOldMessages)
     .use(setOnlineStatus.bind({ activeStatus: true }))
     .on(channel.CONNECTION, (socket: Socket) => {
@@ -46,7 +45,7 @@ app.get("/", function (req: any, res: any) {
     res.sendFile(__dirname + "/index.html");
 });
 app.get("/clients", function (req: any, res: Response, next: NextFunction) {
-    const { adapter }: any = io.of("/")
+    const { adapter }: any = io.of("/");
     adapter.clients((err: any, clients: any) => {
         if (err) {
             return next({ httpStatusCode: 400, message: `Bad request` });
